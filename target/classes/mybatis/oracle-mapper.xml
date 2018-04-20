@@ -1,0 +1,35 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="oracle">
+	
+	<update id="insertTemplateData" parameterType="TemplateDataVO">
+		INSERT INTO TEMPLATE_DATA 
+			(
+				 TEMPLATE_SEQ
+				,SENDERKEY
+				,TEMPLATE_CODE
+				,TEMPLATE_NAME
+				,TEMPLATE_CONTENT
+				,REG_DATE
+				,REG_ID
+				,CUR_STATUS
+			)
+		VALUES
+			(
+				 TEMPLATE_DATA_SEQ01.NEXTVAL
+				,#{senderkey, 					jdbcType=VARCHAR}
+				,#{templateCode, 				jdbcType=VARCHAR} 
+				,#{templateName, 				jdbcType=VARCHAR} 
+				,#{templateContent, 			jdbcType=VARCHAR} 
+				,SYSDATE
+				,#{regId, 						jdbcType=VARCHAR}
+				,#{curStatus, 					jdbcType=INTEGER}			
+			)
+	</update>
+	
+	
+	
+
+</mapper>
