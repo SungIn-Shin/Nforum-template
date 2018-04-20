@@ -1,0 +1,90 @@
+	CUR_STATUS
+
+	
+
+	0 : 등록 요구 (Web 입력)  PROCESS_ING = N
+	1 : 등록 요청 PROCESS_ING = Y
+	2 : 등록 요청 결과 수신  -> INSPECTION_STATUS : REG -> NULL...?  PROCESS_ING = Y
+		(CUR_STATUS=2 이고, INSPECTION_STATUS가 NULL이면 등록요청이 거절당했다는것으로 판정해야함.)
+
+	3 : 검수 요청 PROCESS_ING = N
+	4 : 검수 요청 결과 수신  -> INSPECTION_STATUS : REQ   -> 검수요청 성공시 -> 수정은 X 삭제는 O   검수요청 실패시 -> 수정 O 삭제 O
+		(CUR_STATUS=4 이고, INSPECTION_STATUS가 REG이면 등록요청은 성공했으나 검수요청를 실패했다고 판단)
+
+	SELECT...SELECT...SELECT...  -> INSPECTION_STATUS : APR(승인) or REJ(반려)..  승인, 또는 반려일때  TEMPLATE_ERR_HISTORYS  INSERT
+
+	5 : 수정 요구 (Web 입력)
+	6 : 수정 요청 PROCESS_ING = Y
+	7 : 수정 요청 결과 수신    INS = REG    PROCESS_ING = Y
+	8 : 수정 검수 요청   PROCESS_ING = Y   
+	9 : 수정 검수 요청 결과 수신  INS = REQ   -> 검수요청 성공시 -> 수정은 X 삭제는 O   검수요청 실패시 -> 수정 O 삭제 O   PROCESS_ING = Y
+
+	SELECT...SELECT...SELECT...  -> INSPECTION_STATUS : APR(승인) or REJ(반려)..  승인, 또는 반려일때  TEMPLATE_ERR_HISTORYS  INSERT
+
+	10 : 삭제 요구 (Web 입력)
+	11 : 삭제 요청   PROCESS_ING = Y
+	12 : 삭제 요청 결과 수신   PROCESS_ING = Y
+
+	12 -> 후 성공시 INSPECTION_STATUS : DEL 로 변경 실패해도 그냥 DEL
+	
+
+	
+	조회 요청
+	조회 요청 결과 수신...
+
+
+	TEMPLATE_ERR_HISTORYS (각 요청별 결과 수신 코드 History를 남겨야할듯.. 왜? 어디서? 실패한건지..)
+
+	TEMPLATE_SEQ		NUMBER(11, 0)
+	CUR_STATUS		
+	INSPECTION_STATUS	최종 INSPECTION_STATUS
+	REG_DATE, 		DATE
+	ERR_CODE		?
+	ERR_DESC		VARCHAR2(500)
+
+
+
+	
+	PROCESS_ING = Y : 사용중인 상태(Web에서 건드릴 수 없음.) N : 웹에서 사용가능한 상태.
+	
+
+
+
+
+
+
+	검수요청 실패시 처리 루틴
+	
+	검수요청 실패시 사용자가 다시 요청할 수 있는 UI가 존재하지 않기때문에 검수요청을 모듈이 자동으로 재시도 해줘야함.
+
+
+
+
+
+
+	사용자가 수정 요청을 하는경우 봐야할 상태값
+
+	STATUS = R , INSPECTION_STATUS = REG or REJ
+	
+	우리 프로세스는 기본적으로 REG 후 바로 REQ를 날리기 때문에 대부분이 REJ만 가능할거임.
+
+
+	
+
+
+
+	CUR_STATUS = 1로 바꾸는 시점...
+	요청하기 전 일단 바꾸고 실패시 History 누적
+
+	CUR_STATUS = 2로 바꾸는 시점
+	RESPONSE 받기 전 일단 바꾸고 실패시 History 누적 시켜서 요청결과 수신에 실패했다고 기록하는 형태.
+
+
+
+
+
+
+	문제점
+	1. 결과 Response를 받았음. 그런데 DB에 CUR_STATUS를 2로 Update를 치려는 시점에. DB Exception이 나서 Update를 못쳐ㅑㅆ음
+		- 그럼 CUR_STATUS = 1로 남아있는데, 이미 MTS에서는 Response를 준 상태임.
+		- 
