@@ -28,12 +28,14 @@ public class TemplateDataVO {
 	public TemplateDataVO(ResponseJsonData resData){
 		try {
 			this.senderkey 			= resData.getData().getSenderKey();
+			this.templateCode  		= resData.getData().getTemplateCode();
 			this.templateName 		= resData.getData().getTemplateName();
 			this.templateContent 	= resData.getData().getTemplateContent();
 			this.inspectionStatus 	= resData.getData().getInspectionStatus();
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyy-mm-dd hh:mm:ss");
 			this.createdAt 			= dateFormat.parse(resData.getData().getCreatedAt());
-			this.modifiedAt 		= resData.getData().getModifiedAt() == null ? null : dateFormat.parse(resData.getData().getModifiedAt());
+			String modDate = resData.getData().getModifiedAt();
+			this.modifiedAt 		= modDate.equals("") || modDate == null ? null : dateFormat.parse(resData.getData().getModifiedAt());
 			this.status 			= resData.getData().getStatus();
 		} catch (ParseException e) {
 			e.printStackTrace();

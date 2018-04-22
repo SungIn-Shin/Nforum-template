@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import com.iheart.nforum.alt.template.model.Button;
 import com.iheart.nforum.alt.template.model.ResponseJsonData;
+import com.iheart.nforum.alt.template.model.TemplateButtonVO;
 import com.iheart.nforum.alt.template.model.TemplateDataVO;
 import com.iheart.nforum.alt.template.model.TemplateHistoryVO;
 
@@ -36,8 +37,8 @@ public class TemplateDAO {
 				"jdbc:oracle:thin:@localhost:1521:xe", 
 				"test", 
 				"test",
-				"D:\\workspace\\n-forum_alt\\src\\mybatis\\mybatis-config.xml",
-				"D:\\workspace\\n-forum_alt\\src\\mybatis\\oracle-mapper.xml");
+				"C:\\Users\\ssi\\eclipse-workspace\\Nforum-template\\src\\mybatis\\mybatis-config.xml",
+				"C:\\Users\\ssi\\eclipse-workspace\\Nforum-template\\src\\mybatis\\oracle-mapper.xml");
 		sessionFactory = mybatis.getSessionFactory(ENVI);
 	}
 
@@ -144,9 +145,13 @@ public class TemplateDAO {
 		return result;
 	}
 
-	public int updateResponseTemplateData(ResponseJsonData regRes) {
+	public int updateREGResponseTemplateData(ResponseJsonData regRes) {
 		//
 		TemplateDataVO dataVO = new TemplateDataVO(regRes);
+		
+		// REG 등록 요청 성공시 CUR_STATUS 0에서 1로 변경
+		dataVO.setCurStatus(1);
+		
 		List<Button> buttons = regRes.getData().getButtons();
 		
 		int result = 0;
@@ -155,9 +160,9 @@ public class TemplateDAO {
 		try {
 			session = sessionFactory.openSession(false);
 
-			result += session.update(ENVI + "." + "updateResponseTemplateData", dataVO);
+			result += session.update(ENVI + "." + "updateREGResponseTemplateData", dataVO);
 			for(Button button : buttons) {
-				result += session.update(ENVI + "." + "updateResponseTemplateButtons", button);
+				result += session.update(ENVI + "." + "updateREGResponseTemplateButtons", button);
 			}
 			session.commit();
 		} 
@@ -176,46 +181,49 @@ public class TemplateDAO {
 		int result = 0;
 		SqlSession session = null;
 		TemplateHistoryVO history = new TemplateHistoryVO(dataVO, regRes);
-		for (int i = 0; i < 2;) {
-			try {
-				session = sessionFactory.openSession(false);
-				
-				result += session.insert(ENVI + "." + "insertTemplateHistory", history);
-				session.commit();
-				break;
-			}
-			catch (Exception e) {
-				session.rollback();
-				logger.error("TEMPLATE_CODE : " + dataVO.getTemplateCode() + "//STACK_TRACE : " + StringUtil.stackTrace(e));
-				result = -1;
-			} 
-			finally {
-				if (session != null) session.close();
-			}
+		try {
+			session = sessionFactory.openSession(false);
+			result += session.insert(ENVI + "." + "insertTemplateHistory", history);
+			session.commit();
+		}
+		catch (Exception e) {
+			session.rollback();
+			logger.error("TEMPLATE_CODE : " + dataVO.getTemplateCode() + "//STACK_TRACE : " + StringUtil.stackTrace(e));
+			result = -1;
+		} 
+		finally {
+			if (session != null) session.close();
 		}
 		return result;
 	}
-
-	public int testInsertTemplate(TemplateDataVO vo) {
+	
+	
+	
+	/** 
+	 * 테스트 템플릿 등록 
+	 * @param vo
+	 * @return
+	 */
+	public int testInsertTemplate(TemplateDataVO template, List<TemplateButtonVO> buttons) {
 		int result = 0;
 		SqlSession session = null;
-		for (int i = 0; i < 2;) {
-			try {
-				session = sessionFactory.openSession(false);
-				
-				result += session.insert(ENVI + "." + "insertTemplateHistory", vo);
-				session.commit();
-				break;
+		try {
+			session = sessionFactory.openSession(false);
+			result += session.insert(ENVI + "." + "insertTemplateData", template);
+			for(TemplateButtonVO buttonVO : buttons) {
+				buttonVO.setTemplateCode(template.getTemplateCode());
+				result += session.insert(ENVI + "." + "insertTemplateButton", buttonVO);
 			}
-			catch (Exception e) {
-				System.out.println(StringUtil.stackTrace(e));
-			} 
-			finally {
-				if (session != null) session.close();
-			}
+			session.commit();
+		}
+		catch (Exception e) {
+			session.rollback();
+			System.out.println(StringUtil.stackTrace(e));
+		} 
+		finally {
+			if (session != null) session.close();
 		}
 		return result;
-		
 	}
 
 }

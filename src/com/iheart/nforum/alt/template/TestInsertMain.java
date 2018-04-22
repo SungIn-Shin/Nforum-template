@@ -1,12 +1,15 @@
 package com.iheart.nforum.alt.template;
 
-import org.apache.ibatis.session.SqlSession;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import org.apache.ibatis.session.SqlSessionFactory;
 
 import com.iheart.nforum.alt.template.dao.TemplateDAO;
+import com.iheart.nforum.alt.template.model.TemplateButtonVO;
 import com.iheart.nforum.alt.template.model.TemplateDataVO;
-
-import ssi.lib.utils.MybatisHandler;
 
 public class TestInsertMain {
 	private SqlSessionFactory sessionFactory;
@@ -16,7 +19,7 @@ public class TestInsertMain {
 	
 	public static String TEST_USER = "TEST_NFORUM";
 	
-	public static String TEST_TEMPLATE_NAME = "테스트 템플릿 이름";
+	public static String TEST_TEMPLATE_NAME = "태스트템플릿명";
 	
 	public static String TEST_FAIL_TEMPLATE_CONTENT = "테스트 템플릿 내용입니다. 반려좀 시켜주세요. TEST NUMBER : ";
 	
@@ -34,24 +37,42 @@ public class TestInsertMain {
 	
 	
 	public void insert() {
-		TemplateDataVO vo = new TemplateDataVO();
-		vo.setSenderkey("4fe04f2c0cccde3d61ac8a3bd92c386a07d1f8cd");
-		vo.setTemplateCode(TEST_USER);
-		vo.setTemplateName(TEST_TEMPLATE_NAME);
-		vo.setTemplateContent("");
-		vo.setRegId(TEST_USER);
-		vo.setCurStatus(0);
 		
-		int insertCnt = dao.testInsertTemplate(vo);
+		String yyyymmddhhmmss = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+		
+		
+		TemplateDataVO templateVO = new TemplateDataVO();
+		templateVO.setSenderkey("4fe04f2c0cccde3d61ac8a3bd92c386a07d1f8cd");
+		templateVO.setTemplateCode(TEST_USER + yyyymmddhhmmss);
+		templateVO.setTemplateName(TEST_TEMPLATE_NAME + yyyymmddhhmmss);
+		templateVO.setTemplateContent(TEST_SUCC_TEMPLATE_CONTENT + yyyymmddhhmmss);
+		templateVO.setRegId(TEST_USER);
+		templateVO.setCurStatus(0);
+		
+		
+		List<TemplateButtonVO> btnList = new ArrayList<>();
+		// button 입력...
+		for(int i = 1; i <= 5; i++) {
+			TemplateButtonVO btnVO = new TemplateButtonVO();
+			btnVO.setOrdering(i);
+			btnVO.setButtonName(TEST_USER + "_TEST_BUTTON_" + i);
+			btnVO.setLinktype("WL");
+			btnVO.setLinkpc("http://www.testweblink.com/" + i);
+			btnList.add(btnVO);
+		}
+		
+
+		
+		int insertCnt = dao.testInsertTemplate(templateVO, btnList);
 		System.out.println(insertCnt);
 	}
 	
-	public void test() {
-		System.out.println(dao.test());;
-	}
+//	public void test() {
+//		System.out.println(dao.test());;
+//	}
 	
 	public static void main(String[] args) {
-		TemplateDAO dao = TemplateDAO.getInstance();
-		System.out.println(dao.test());
+		TestInsertMain test = new TestInsertMain();
+		test.insert();
 	}
 }

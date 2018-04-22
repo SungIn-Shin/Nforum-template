@@ -3,6 +3,115 @@
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="oracle">
+
+	<select id="test" resultType="int">
+		SELECT COUNT(*) FROM TEMPLATE_DATA
+	</select>
+	
+	<!-- select polling 조건 -->
+	<select id="selectTemplateData" resultType="TemplateDataVO">
+		SELECT 
+			 TEMPLATE_SEQ
+			,SENDERKEY
+			,TEMPLATE_CODE
+			,TEMPLATE_NAME
+			,TEMPLATE_CONTENT
+			,INSPECTION_STATUS
+			,CREATED_AT
+			,MODIFIED_AT
+			,REG_DATE
+			,MOD_DATE
+			,REG_ID
+			,MOD_ID
+			,STATUS
+			,CUR_STATUS
+			,PROCESS_ING
+		FROM
+			TEMPLATE_DATA
+		WHERE
+			CUR_STATUS 	=  0 			AND
+			PROCESS_ING = 'N'			AND
+			INSPECTION_STATUS IS NULL
+		
+	</select>
+	
+	<select id="selectTemplateButtons" parameterType="String" resultType="TemplateButtonVO">
+		SELECT 
+			 TEMPLATE_CODE
+			,ORDERING
+			,BUTTON_NAME
+			,LINKTYPE
+			,LINKMO
+			,LINKPC
+			,LINKIOS
+			,LINKAND
+		FROM
+			TEMPLATE_BUTTONS
+		WHERE 
+			TEMPLATE_CODE = #{templateCode, jdbcType=VARCHAR}			
+	</select>
+	
+	<update id="updateTemplateCurStatus" parameterType = "TemplateDataVO">
+		UPDATE TEMPLATE_DATA
+		SET
+			CUR_STATUS 		= #{curStatus, jdbcType=INTEGER}
+		WHERE 
+			TEMPLATE_SEQ 	= #{templateSeq, jdbcType=INTEGER}
+	</update>
+	
+	
+	<update id="updateREGResponseTemplateData" parameterType="TemplateDataVO">
+		UPDATE 
+			TEMPLATE_DATA
+		SET
+			TEMPLATE_NAME 		= #{templateName, 		jdbcType=VARCHAR},  
+			TEMPLATE_CONTENT 	= #{templateContent, 	jdbcType=VARCHAR},  
+			INSPECTION_STATUS 	= #{inspectionStatus, 	jdbcType=VARCHAR},  
+			CREATED_AT 			= #{createdAt, 			jdbcType=VARCHAR},  
+			MODIFIED_AT 		= #{modifiedAt, 		jdbcType=VARCHAR},
+			CUR_STATUS 			= #{curStatus, 			jdbcType=INTEGER},    
+			STATUS 				= #{status, 			jdbcType=VARCHAR}
+		WHERE
+			SENDERKEY 			= #{senderkey, 			jdbcType=VARCHAR}		AND
+			TEMPLATE_CODE 		= #{templateCode, 		jdbcType=VARCHAR} 
+	</update>
+	
+	<update id="updateREGResponseTemplateButtons" parameterType="TemplateButtonVO">
+		UPDATE
+			TEMPLATE_BUTTONS
+		SET
+			BUTTON_NAME		= #{buttonName, 			jdbcType=VARCHAR},
+			LINKTYPE		= #{linktype, 			jdbcType=VARCHAR},
+			LINKMO			= #{linkmo, 			jdbcType=VARCHAR},
+			LINKPC			= #{linkpc, 			jdbcType=VARCHAR},
+			LINKIOS			= #{linkios, 			jdbcType=VARCHAR},
+			LINKAND			= #{linkand, 			jdbcType=VARCHAR}
+		WHERE 
+			TEMPLATE_CODE 		= #{templateCode, 		jdbcType=VARCHAR} 		AND
+			ORDERING			= #{ordering, jdbcType=INTEGER}
+	</update>
+	
+	
+	<update id="insertTemplateHistory" parameterType="TemplateHistoryVO">
+		INSERT INTO TEMPLATE_HISTORY
+			(
+				 TEMPLATE_CODE
+				,CUR_STATUS
+				,INSPECTION_STATUS
+				,REG_DATE
+				,RESULT_CODE
+				,RESULT_DESC
+			)
+		VALUES
+			(
+				 #{templateCode, 			jdbcType=VARCHAR}
+				,#{curStatus, 				jdbcType=INTEGER}
+				,#{inspectionStatus, 		jdbcType=VARCHAR}
+				,#{regDate, 				jdbcType=DATE}
+				,#{resultCode, 				jdbcType=VARCHAR}
+				,#{resultDesc, 				jdbcType=VARCHAR}
+			)
+	</update>
 	
 	<update id="insertTemplateData" parameterType="TemplateDataVO">
 		INSERT INTO TEMPLATE_DATA 
@@ -29,6 +138,31 @@
 			)
 	</update>
 	
+	
+	<update id="insertTemplateButton" parameterType="TemplateButtonVO">
+		INSERT INTO TEMPLATE_BUTTONS
+			(
+				 TEMPLATE_CODE
+				,ORDERING
+				,BUTTON_NAME
+				,LINKTYPE
+				,LINKMO
+				,LINKPC
+				,LINKIOS
+				,LINKAND
+			)
+		VALUES
+			(
+				 #{templateCode, 					jdbcType=VARCHAR}
+				,#{ordering, 						jdbcType=INTEGER}
+				,#{buttonName, 						jdbcType=VARCHAR}
+				,#{linktype, 						jdbcType=VARCHAR}
+				,#{linkmo, 							jdbcType=VARCHAR}
+				,#{linkpc, 							jdbcType=VARCHAR}
+				,#{linkios, 						jdbcType=VARCHAR}
+				,#{linkand, 						jdbcType=VARCHAR}
+			)
+	</update>
 	
 	
 

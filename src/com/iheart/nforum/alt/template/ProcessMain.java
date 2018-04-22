@@ -27,7 +27,7 @@ public class ProcessMain implements Runnable {
 	
 	public static void main(String[] args) {
 		ProcessMain main = new ProcessMain();
-		new Thread(main).start();
+		new Thread(main, "RegistThread").start();
 	}
 	public ProcessMain() {
 		init();
@@ -69,6 +69,7 @@ public class ProcessMain implements Runnable {
 				logger.debug("DataBase Template Data List IS EMPTY ... 3 second sleep ...");
 				try {Thread.sleep(3000);} catch (InterruptedException e) {e.printStackTrace();}
 			}
+			break;
 		}
 	}
 	

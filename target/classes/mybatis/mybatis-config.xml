@@ -24,6 +24,8 @@
 	<typeAliases>
 		<typeAlias alias="TemplateButtonVO" 				type="com.iheart.nforum.alt.template.model.TemplateButtonVO" />
 		<typeAlias alias="TemplateDataVO" 					type="com.iheart.nforum.alt.template.model.TemplateDataVO" />
+		<typeAlias alias="TemplateHistoryVO" 					type="com.iheart.nforum.alt.template.model.TemplateHistoryVO" />
+		
 	</typeAliases>
 	
 	<typeHandlers>

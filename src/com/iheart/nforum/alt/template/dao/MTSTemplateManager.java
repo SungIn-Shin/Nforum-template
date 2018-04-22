@@ -8,8 +8,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
@@ -21,6 +19,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.iheart.nforum.alt.template.model.RequestData;
 
@@ -51,7 +51,7 @@ public class MTSTemplateManager {
 	 */
 	public static final String SELECT_TEMPLATE_URI = "/mts/api/check/template";
 	
-	private final Log logger = LogFactory.getLog(MTSTemplateManager.class);
+	private final Logger logger = LoggerFactory.getLogger(MTSTemplateManager.class);
 	
 	private CloseableHttpClient httpClient = null;
 	
