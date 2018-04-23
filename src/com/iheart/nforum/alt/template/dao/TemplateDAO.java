@@ -37,8 +37,8 @@ public class TemplateDAO {
 				"jdbc:oracle:thin:@localhost:1521:xe", 
 				"test", 
 				"test",
-				"C:\\Users\\ssi\\eclipse-workspace\\Nforum-template\\src\\mybatis\\mybatis-config.xml",
-				"C:\\Users\\ssi\\eclipse-workspace\\Nforum-template\\src\\mybatis\\oracle-mapper.xml");
+				"D:\\workspace\\n-forum_alt\\src\\mybatis\\mybatis-config.xml",
+				"D:\\workspace\\n-forum_alt\\src\\mybatis\\oracle-mapper.xml");
 		sessionFactory = mybatis.getSessionFactory(ENVI);
 	}
 
@@ -66,13 +66,13 @@ public class TemplateDAO {
 		return result;
 	}
 
-	public List<TemplateDataVO> selectTemplateData() {
+	public List<TemplateDataVO> selectRegistTemplateData() {
 		//
 		List<TemplateDataVO> rsltList = new ArrayList<TemplateDataVO>();
 		SqlSession session = null;
 		try {
 			session = sessionFactory.openSession();
-			rsltList = session.selectList(ENVI + "." + "selectTemplateData");
+			rsltList = session.selectList(ENVI + "." + "selectRegistTemplateData");
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -99,23 +99,24 @@ public class TemplateDAO {
 		return rsltList;
 	}
 
-	public int updateTemplateCurStatus(TemplateDataVO dataVO) {
+	public int updateCurStatusAndProcessIng(TemplateDataVO dataVO) {
 		//
 		int result = 0;
-
 		SqlSession session = null;
 		try {
-			session = sessionFactory.openSession();
-			result = session.update(ENVI + "." + "updateTemplateCurStatus", dataVO);
+			session = sessionFactory.openSession(false);
+			result = session.update(ENVI + "." + "updateCurStatusAndProcessIng", dataVO);
+			session.commit();
 		} catch (Exception e) {
+			session.rollback();
 			logger.error("TEMPLATE_CODE : " + dataVO.getTemplateCode() + "//STACK_TRACE : " + StringUtil.stackTrace(e));
 		} finally {
 			if (session != null)
 				session.close();
 		}
 		return result;
-
 	}
+	
 
 	/**
 	 * Http Response 데이터 Update
@@ -145,13 +146,11 @@ public class TemplateDAO {
 		return result;
 	}
 
-	public int updateREGResponseTemplateData(ResponseJsonData regRes) {
+	public int updateREGOrMODResponseTemplateData(ResponseJsonData regRes) {
 		//
 		TemplateDataVO dataVO = new TemplateDataVO(regRes);
 		
-		// REG 등록 요청 성공시 CUR_STATUS 0에서 1로 변경
-		dataVO.setCurStatus(1);
-		
+		logger.error(dataVO.toString());
 		List<Button> buttons = regRes.getData().getButtons();
 		
 		int result = 0;
@@ -160,9 +159,9 @@ public class TemplateDAO {
 		try {
 			session = sessionFactory.openSession(false);
 
-			result += session.update(ENVI + "." + "updateREGResponseTemplateData", dataVO);
+			result += session.update(ENVI + "." + "updateREGOrMODResponseTemplateData", dataVO);
 			for(Button button : buttons) {
-				result += session.update(ENVI + "." + "updateREGResponseTemplateButtons", button);
+				result += session.update(ENVI + "." + "updateREGOrMODResponseTemplateButtons", button);
 			}
 			session.commit();
 		} 
@@ -174,8 +173,29 @@ public class TemplateDAO {
 		finally {
 			if (session != null) session.close();
 		}
+		return result;	
+	}
+	
+	public int updateREQResponseTemplateData(TemplateDataVO dataVO) {
+		//
+		dataVO.setInspectionStatus("REQ");
+		int result = 0;
+		SqlSession session = null;
+		try {
+			session = sessionFactory.openSession();
+			result = session.update(ENVI + "." + "updateREQResponseTemplateData", dataVO);
+			session.commit();
+		} catch (Exception e) {
+			session.rollback();
+			logger.error("TEMPLATE_CODE : " + dataVO.getTemplateCode() + "//STACK_TRACE : " + StringUtil.stackTrace(e));
+		} finally {
+			if (session != null)
+				session.close();
+		}
 		return result;
 	}
+	
+	
 
 	public int insertTemplateHistory(TemplateDataVO dataVO, ResponseJsonData regRes) {
 		int result = 0;
@@ -225,5 +245,40 @@ public class TemplateDAO {
 		}
 		return result;
 	}
+
+	public List<TemplateDataVO> selectInspectTemplateList() {
+		//
+		List<TemplateDataVO> rsltList = new ArrayList<TemplateDataVO>();
+		SqlSession session = null;
+		try {
+			session = sessionFactory.openSession();
+			rsltList = session.selectList(ENVI + "." + "selectInspectTemplateList");
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (session != null)
+				session.close();
+		}
+
+		return rsltList;
+	}
+
+	public List<TemplateDataVO> selectModifyTemplateList() {
+		List<TemplateDataVO> rsltList = new ArrayList<TemplateDataVO>();
+		SqlSession session = null;
+		try {
+			session = sessionFactory.openSession();
+			rsltList = session.selectList(ENVI + "." + "selectModifyTemplateList");
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (session != null)
+				session.close();
+		}
+
+		return rsltList;
+	}
+
+	
 
 }

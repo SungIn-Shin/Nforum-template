@@ -61,8 +61,6 @@ public class TestInsertMain {
 			btnList.add(btnVO);
 		}
 		
-
-		
 		int insertCnt = dao.testInsertTemplate(templateVO, btnList);
 		System.out.println(insertCnt);
 	}

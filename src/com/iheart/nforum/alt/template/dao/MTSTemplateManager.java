@@ -137,7 +137,7 @@ public class MTSTemplateManager {
 		params.add(new BasicNameValuePair("senderKeyType"		, "S"));
 		httpPost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
 		// Request print
-		logger.info(httpRequestToString(httpPost));
+		logger.info("Inspect Protocol \r\n" + httpRequestToString(httpPost));
 		return httpPost;
 	}
 
@@ -209,7 +209,7 @@ public class MTSTemplateManager {
 		params.add(new BasicNameValuePair("inspectionStatus"	, "REG"));
 		httpPost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
 		// Request print
-		logger.info(httpRequestToString(httpPost));
+		logger.info("Regist Protocol \r\n" + httpRequestToString(httpPost));
 		return httpPost;
 	}
 	
@@ -238,10 +238,8 @@ public class MTSTemplateManager {
 			sb.append("\r\n");
 			logger.info("HTTP Request -> " + sb.toString());
 		} catch (UnsupportedOperationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return sb.toString();

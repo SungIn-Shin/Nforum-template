@@ -6,86 +6,141 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
-import com.iheart.nforum.alt.template.dao.MTSTemplateManager;
-import com.iheart.nforum.alt.template.dao.MTSTemplateManager.MODE;
 import com.iheart.nforum.alt.template.dao.TemplateDAO;
 import com.iheart.nforum.alt.template.model.Button;
 import com.iheart.nforum.alt.template.model.RequestData;
-import com.iheart.nforum.alt.template.model.ResponseJsonData;
 import com.iheart.nforum.alt.template.model.TemplateDataVO;
 
-public class ProcessMain implements Runnable {
+public class ProcessMain {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ProcessMain.class);
 	
-	private TemplateDAO dao;
+	private static TemplateDAO dao;
 	
-	private TemplateProcess process;
+	private static TemplateProcess process;
 	
-	private Gson gson = new Gson();
+	private static Gson gson = new Gson();
 	
-	
-	public static void main(String[] args) {
-		ProcessMain main = new ProcessMain();
-		new Thread(main, "RegistThread").start();
-	}
 	public ProcessMain() {
 		init();
 	}
-	
 	
 	private void init() {
 		dao = TemplateDAO.getInstance();
 		process = new TemplateProcess(dao);
 	}
 	
-	
-	
-	
-	@Override
-	public void run() {
-		//
-		
-		while(true) {
-			List<TemplateDataVO> tmpList = dao.selectTemplateData();
-			
-			if(!tmpList.isEmpty()) {
-				logger.info("");
-				logger.info("DataBase Template Data List : " + tmpList.size());
-				logger.info("");
-				for(TemplateDataVO dataVO : tmpList)
-				{
-					String templateCode = dataVO.getTemplateCode();
-					List<Button> btnList = dao.selectTemplateButtons(templateCode);
-					String buttons = btnList.isEmpty() ? null : makeButtonArray(btnList);
-					RequestData reqData = new RequestData(dataVO, buttons);
-					logger.info(reqData.toString());
-					// 1. MTS 템플릿 등록 로직
-					process.templateRegist(dataVO, reqData);
-				}
-			} 
-			else {
-				// 1초 sleep...
-				logger.debug("DataBase Template Data List IS EMPTY ... 3 second sleep ...");
-				try {Thread.sleep(3000);} catch (InterruptedException e) {e.printStackTrace();}
-			}
-			break;
-		}
+	public void startProcess() {
+		startRegister();
+		startInspecter();
+		startModifier();
+		startStateChecker();
 	}
 	
 	
+	private void startStateChecker() {
+		
+	}
+
+	/**
+	 * 등록용 T
+	 */
+	private void startRegister() {
+		
+		new Thread(()-> {
+			//
+			while(true) {
+				//
+				List<TemplateDataVO> tmpList = dao.selectRegistTemplateData();
+				if(!tmpList.isEmpty()) {
+					//
+					logger.info("================================================");
+					logger.info("[REG] - REQ Data List Size : " + tmpList.size());
+					logger.info("================================================");
+					for(TemplateDataVO dataVO : tmpList) {
+						String templateCode = dataVO.getTemplateCode();
+						List<Button> btnList = dao.selectTemplateButtons(templateCode);
+						String buttons = btnList.isEmpty() ? null : makeButtonArray(btnList);
+						RequestData reqData = new RequestData(dataVO, buttons);
+						logger.info(reqData.toString());
+						// 1. MTS 템플릿 등록 로직
+						process.templateRegist(dataVO, reqData);
+					}
+				}
+				else {
+					// 1초 sleep...
+					logger.debug("DataBase Template Data List IS EMPTY ... 3 second sleep ...");
+					try {Thread.sleep(3000);} catch (InterruptedException e) {e.printStackTrace();}
+				}
+			}
+		}, "RegistJobThread");
+	}
+	
+	/**
+	 * 검수요청 THread
+	 */
+	private void startInspecter() {
+		// 검수요청 Thread
+		new Thread(()->{
+			//
+			while(true) {
+				//
+				List<TemplateDataVO> tmpList = dao.selectInspectTemplateList();
+				if(!tmpList.isEmpty()) {
+					//
+					logger.info("================================================");
+					logger.info("[REQ] - REQ Data List Size : " + tmpList.size());
+					logger.info("================================================");
+					for(TemplateDataVO dataVO : tmpList) {
+						String templateCode = dataVO.getTemplateCode();
+						List<Button> btnList = dao.selectTemplateButtons(templateCode);
+						String buttons = btnList.isEmpty() ? null : makeButtonArray(btnList);
+						RequestData reqData = new RequestData(dataVO, buttons);
+						logger.info(reqData.toString());
+						// 1. MTS 템플릿 등록 로직
+						process.templateInspect(dataVO, reqData);
+					}
+				}
+				else {
+					// 1초 sleep...
+					logger.debug("DataBase Template Data List IS EMPTY ... 3 second sleep ...");
+					try {Thread.sleep(1000);} catch (InterruptedException e) {e.printStackTrace();}
+				}
+				try {Thread.sleep(1000);} catch (InterruptedException e) {e.printStackTrace();}
+			}
+		}, "InspectJobThread").start();
+	}
 	
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+	private void startModifier() {
+		new Thread(()->{
+			//
+			while(true) {
+				//
+				List<TemplateDataVO> tmpList = dao.selectModifyTemplateList();
+				if(!tmpList.isEmpty()) {
+					//
+					logger.info("[MOD] - REQ Data List Size : " + tmpList.size());
+					for(TemplateDataVO dataVO : tmpList) {
+						String templateCode = dataVO.getTemplateCode();
+						List<Button> btnList = dao.selectTemplateButtons(templateCode);
+						String buttons = btnList.isEmpty() ? null : makeButtonArray(btnList);
+						RequestData reqData = new RequestData(dataVO, buttons);
+						logger.info(reqData.toString());
+						// 1. MTS 템플릿 등록 로직
+						process.templateModify(dataVO, reqData);
+					}
+				}
+				else {
+					// 1초 sleep...
+					logger.debug("DataBase Template Data List IS EMPTY ... 3 second sleep ...");
+					try {Thread.sleep(1000);} catch (InterruptedException e) {e.printStackTrace();}
+				}
+				try {Thread.sleep(1000);} catch (InterruptedException e) {e.printStackTrace();}
+			}
+		}, "ModifyJobThread").start();
+	}
+
 	/**
 	 * {buttons1...}, {buttons2...}, {buttons3...} 형태로 만들어줌
 	 * @param btnList
@@ -103,4 +158,15 @@ public class ProcessMain implements Runnable {
 		}
 		return rslt;
 	}
+	
+	public static void main(String[] args) {
+		TestInsertMain test = new TestInsertMain();
+		test.insert();
+		
+		ProcessMain main = new ProcessMain();
+		main.startProcess();
+	}
+	
+	
+	
 }

@@ -154,6 +154,18 @@ public class TemplateDataVO {
 	public void setProcessIng(String processIng) {
 		this.processIng = processIng;
 	}
+
+	@Override
+	public String toString() {
+		return "TemplateDataVO [templateSeq=" + templateSeq + ", senderkey=" + senderkey + ", templateCode="
+				+ templateCode + ", templateName=" + templateName + ", templateContent=" + templateContent
+				+ ", inspectionStatus=" + inspectionStatus + ", createdAt=" + createdAt + ", modifiedAt=" + modifiedAt
+				+ ", regDate=" + regDate + ", modDate=" + modDate + ", regId=" + regId + ", modId=" + modId
+				+ ", status=" + status + ", curStatus=" + curStatus + ", processIng=" + processIng + "]";
+	}
+	
+	
+	
 	
 	
 }

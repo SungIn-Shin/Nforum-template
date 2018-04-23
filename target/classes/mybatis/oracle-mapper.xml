@@ -8,8 +8,8 @@
 		SELECT COUNT(*) FROM TEMPLATE_DATA
 	</select>
 	
-	<!-- select polling 조건 -->
-	<select id="selectTemplateData" resultType="TemplateDataVO">
+	<!-- 등록요청 CUR_STATUS = 0 select polling 조건 -->
+	<select id="selectRegistTemplateData" resultType="TemplateDataVO">
 		SELECT 
 			 TEMPLATE_SEQ
 			,SENDERKEY
@@ -29,10 +29,38 @@
 		FROM
 			TEMPLATE_DATA
 		WHERE
-			CUR_STATUS 	=  0 			AND
-			PROCESS_ING = 'N'			AND
+			CUR_STATUS 	=  0 				AND
+			PROCESS_ING = 'N'				AND
 			INSPECTION_STATUS IS NULL
-		
+	</select>
+	
+	<!-- 검수요청 데이터 Select -->
+	<select id="selectInspectTemplateList" resultType="TemplateDataVO">
+		SELECT 
+			  SENDERKEY
+			 ,TEMPLATE_CODE
+		FROM
+			TEMPLATE_DATA
+		WHERE
+			CUR_STATUS			IN (2, 7)	AND
+			PROCESS_ING 		= 'N'		AND
+			INSPECTION_STATUS 	= 'REG'
+	</select>
+	
+	<!-- 수정요청 데이터 Select -->
+	<select id="selectModifyTemplateList"resultType="TemplateDataVO">
+		SELECT
+			 TEMPLATE_NAME
+			,TEMPLATE_CODE
+			,TEMPLATE_CONTENT
+			,SENDERKEY
+		FROM 
+			TEMPLATE_DATA
+		WHERE
+			CUR_STATE			= 5			AND
+			PROCESS_ING			= 'N'		AND
+			STATUS				= 'R'		AND
+			INSPECTION_STATUS	IN	('REG', 'REJ')
 	</select>
 	
 	<select id="selectTemplateButtons" parameterType="String" resultType="TemplateButtonVO">
@@ -51,16 +79,30 @@
 			TEMPLATE_CODE = #{templateCode, jdbcType=VARCHAR}			
 	</select>
 	
-	<update id="updateTemplateCurStatus" parameterType = "TemplateDataVO">
+	
+	
+	<update id="updateREQResponseTemplateData" parameterType = "TemplateDataVO">
 		UPDATE TEMPLATE_DATA
 		SET
-			CUR_STATUS 		= #{curStatus, jdbcType=INTEGER}
+			INSPECTION_STATUS 	= #{inspectionStatus, jdbcType=VARCHAR}
 		WHERE 
-			TEMPLATE_SEQ 	= #{templateSeq, jdbcType=INTEGER}
+			SENDERKEY 			= #{senderkey, 			jdbcType=VARCHAR}		AND
+			TEMPLATE_CODE 		= #{templateCode, 		jdbcType=VARCHAR} 
 	</update>
 	
 	
-	<update id="updateREGResponseTemplateData" parameterType="TemplateDataVO">
+	<update id="updateCurStatusAndProcessIng" parameterType = "TemplateDataVO">
+		UPDATE TEMPLATE_DATA
+		SET
+			CUR_STATUS 		= #{curStatus, jdbcType=INTEGER}, 
+			PROCESS_ING		= #{processIng, jdbcType=VARCHAR}
+		WHERE 
+			SENDERKEY 			= #{senderkey, 			jdbcType=VARCHAR}		AND
+			TEMPLATE_CODE 		= #{templateCode, 		jdbcType=CHAR} 
+	</update>
+	
+	
+	<update id="updateREGOrMODResponseTemplateData" parameterType="TemplateDataVO">
 		UPDATE 
 			TEMPLATE_DATA
 		SET
@@ -69,25 +111,24 @@
 			INSPECTION_STATUS 	= #{inspectionStatus, 	jdbcType=VARCHAR},  
 			CREATED_AT 			= #{createdAt, 			jdbcType=VARCHAR},  
 			MODIFIED_AT 		= #{modifiedAt, 		jdbcType=VARCHAR},
-			CUR_STATUS 			= #{curStatus, 			jdbcType=INTEGER},    
 			STATUS 				= #{status, 			jdbcType=VARCHAR}
 		WHERE
 			SENDERKEY 			= #{senderkey, 			jdbcType=VARCHAR}		AND
 			TEMPLATE_CODE 		= #{templateCode, 		jdbcType=VARCHAR} 
 	</update>
 	
-	<update id="updateREGResponseTemplateButtons" parameterType="TemplateButtonVO">
+	<update id="updateREGOrMODResponseTemplateButtons" parameterType="TemplateButtonVO">
 		UPDATE
 			TEMPLATE_BUTTONS
 		SET
-			BUTTON_NAME		= #{buttonName, 			jdbcType=VARCHAR},
-			LINKTYPE		= #{linktype, 			jdbcType=VARCHAR},
-			LINKMO			= #{linkmo, 			jdbcType=VARCHAR},
-			LINKPC			= #{linkpc, 			jdbcType=VARCHAR},
-			LINKIOS			= #{linkios, 			jdbcType=VARCHAR},
-			LINKAND			= #{linkand, 			jdbcType=VARCHAR}
+			BUTTON_NAME			= #{buttonName, 			jdbcType=VARCHAR},
+			LINKTYPE			= #{linktype, 				jdbcType=VARCHAR},
+			LINKMO				= #{linkmo, 				jdbcType=VARCHAR},
+			LINKPC				= #{linkpc, 				jdbcType=VARCHAR},
+			LINKIOS				= #{linkios, 				jdbcType=VARCHAR},
+			LINKAND				= #{linkand, 				jdbcType=VARCHAR}
 		WHERE 
-			TEMPLATE_CODE 		= #{templateCode, 		jdbcType=VARCHAR} 		AND
+			TEMPLATE_CODE 		= #{templateCode, 			jdbcType=VARCHAR} 		AND
 			ORDERING			= #{ordering, jdbcType=INTEGER}
 	</update>
 	
